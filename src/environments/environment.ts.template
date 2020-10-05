@@ -1,16 +1,25 @@
 export const environment = {
   production: false,
   firebase: {
-    apiKey: '<%= MY_NETATMO_DASHBOARD_FIREBASE_API_KEY %>',
-    authDomain: '<%= MY_NETATMO_DASHBOARD_FIREBASE_AUTH_DOMAIN %>',
-    databaseURL: '<%= MY_NETATMO_DASHBOARD_FIREBASE_DATABASE_URL %>',
-    projectId: '<%= MY_NETATMO_DASHBOARD_FIREBASE_PROJECT_ID %>',
-    storageBucket: '<%= MY_NETATMO_DASHBOARD_FIREBASE_STORAGE_BUCKET %>',
-    messagingSenderId: '<%= MY_NETATMO_DASHBOARD_FIREBASE_SENDER_ID %>',
+    apiKey: 'AIzaSyBErRJ0S5T4t-KFeUm6r0OSXwcOPyDfBL0',
+    authDomain: 'mynetatmoapp-d8e96.firebaseapp.com',
+    databaseURL: 'https://mynetatmoapp-d8e96.firebaseio.com',
+    projectId: 'mynetatmoapp-d8e96',
+    storageBucket: '',
+    messagingSenderId: '769805617835',
+    appId: '1:769805617835:web:9ee3f3729aacba25ca85ee',
+    measurementId: 'G-FLHK3WSPLV'
   },
   netatmo: {
-    clientId: '<%= MY_NETATMO_DASHBOARD_NETATMO_CLIENT_ID %>',
-    clientSecret: '<%= MY_NETATMO_DASHBOARD_NETATMO_CLIENT_SECRET %>',
+    boiler_device_id: '70:ee:50:23:8e:5a',
+    boiler_module_id: '04:00:00:23:c1:0a',
+
+    weather_device_id: '70:ee:50:36:9d:ba',
+    weather_External_module_id: '02:00:00:36:ac:b4',
+    weather_Dormitorio_module_id: '03:00:00:07:2a:c6',
+
+    clientId: '5beb3fdb13475d0a758c9239',
+    clientSecret: 'ss1IcHVg2rDPGMZSIpfYs9Mmtgi1zRsbp',
     redirectUri: 'http://localhost:4200/callback',
   },
 };

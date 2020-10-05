@@ -5,25 +5,43 @@
     <img [src]="user.photoURL" class="avatar">
     <button (click)="logout()">Logout</button>
   </div>
-     
+  
     <!-- <h2>User:</h2>
     <pre>{{ user | json }}</pre> -->
     <h3>Values:</h3>
     <pre>{{ values$ | async | json }}</pre> 
-    
-  <div>
-    <button (click)="getMeasureMonhly()">Monthly</button>
-    <button (click)="getMeasureByDays()">Daily</button>
-  </div>
   
-  <div>
-    <canvas #lineChartDaily class="chart-container">{{ chartDaily }}</canvas>
-  </div>  
-  <p></p>
-  <div>
-    <canvas #lineChartMonthly class="chart-container">{{ chartMonthly }}</canvas>
-  </div>
 
+  <div>
+    <button class="btn" (click)="getMeasureByDays()">Daily</button>
+    &nbsp;&nbsp;
+    <button class="btn" (click)="getMeasureMonhly()">Monthly</button>
+  </div> 
+  
+  <!-- Labels Date Filter -->
+  <div style="margin-left: auto">
+    <select [(ngModel)]="from" style="width: 150px;height: 30px;">
+      <option *ngFor="let m of months" [value]='m.value'>{{m.month}}</option>
+    </select>
+  &nbsp;&nbsp;
+  <select [(ngModel)]="toMonth" style="width: 150px;height: 30px;">
+    <option *ngFor="let m1 of months" [value]='m1.value'>{{m1.month}}</option>
+  </select> 
+  </div>
+  <button class="button" (click)="applyDateFilter()">Apply Date Filter</button>
+
+  <!-- -->
+  <select [(ngModel)]="lessThanOrGreaterThan" style="width: 150px;height: 30px;">
+    <option value='lessThan'>Less Than</option>
+    <option value='greaterThan'>Greater Than</option>
+  </select>&nbsp;&nbsp;
+  <input [(ngModel)]="filterLimit" placeholder="Filter Limit" style="width: 150px;height: 30px;"><br><br>
+  <button class="button" (click)="applyFilter(filterLimit)">Apply Filter</button>
+
+
+  
+  <canvas #lineChartDaily class="chart-container">{{ chartDaily }}</canvas>
+  <canvas #lineChartMonthly class="chart-container">{{ chartMonthly }}</canvas>
 
 </div>
 

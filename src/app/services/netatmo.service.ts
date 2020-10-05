@@ -78,8 +78,8 @@ export class NetatmoService {
     return this.http.get(this.url);
   }
 
-  getWeatherMeasure(access_token: string, scale: string, date_begin: number, date_end: number) {
-    const Weather_type = 'Temperature,Humidity';
+  getWeatherExternalMeasure(access_token: string, scale: string, date_begin: number, date_end: number) {
+    const Weather_type = 'Temperature,Humidity,min_temp,max_temp,rain';
     this.url = 'https://api.netatmo.com/api/getmeasure?' +
       'access_token=' + access_token + '&' +
       'device_id=' + environment.netatmo.weather_device_id + '&' +
@@ -93,5 +93,18 @@ export class NetatmoService {
     return this.http.get(this.url);
   }
 
-
+  getWeatherbedroomMeasure(access_token: string, scale: string, date_begin: number, date_end: number) {
+    const Weather_type = 'Temperature,Humidity,min_temp,max_temp';
+    this.url = 'https://api.netatmo.com/api/getmeasure?' +
+      'access_token=' + access_token + '&' +
+      'device_id=' + environment.netatmo.weather_device_id + '&' +
+      'module_id=' + environment.netatmo.weather_Dormitorio_module_id + '&' +
+      'scale=' + scale + '&' +
+      'type=' + Weather_type + '&' +
+      'date_begin=' + date_begin + '&' +
+      'date_end=' + date_end + '&' +
+      'optimize=' + this.optimize + '&' +
+      'real_time=' + this.real_time;
+    return this.http.get(this.url);
+  }
 }
