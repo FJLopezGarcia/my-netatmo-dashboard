@@ -5,12 +5,18 @@
   border-radius: 50%;
 }
 
+.divChart {
+  display: lines;
+  width: 100px;
+  height: 100px;
+}
+
 // @media (orientation:portrait) {
 //   .chart-container {
 //     min-height: 50vh;
 //   }
 //  }
- 
+
 //  @media (orientation:landscape) {
 //   .chart-container {
 //     min-height: 50vh;

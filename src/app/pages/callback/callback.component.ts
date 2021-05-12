@@ -43,7 +43,7 @@ export class CallbackComponent implements OnInit {
             },
             { merge: true }
           );
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/home']);
       },
       err => {
         let error: string;
@@ -56,7 +56,7 @@ export class CallbackComponent implements OnInit {
           console.error('Unknown callback error:', err);
         }
 
-        this.router.navigate(['/dashboard'], { queryParams: { error } });
+        this.router.navigate(['/home'], { queryParams: { error } });
       }
     );
   }

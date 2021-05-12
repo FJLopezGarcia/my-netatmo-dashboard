@@ -1,3 +1,6 @@
 {
-  "git.ignoreLimitWarning": true
+  "git.ignoreLimitWarning": true,
+  "appService.zipIgnorePattern": ["node_modules{,/**}", ".vscode{,/**}"],
+  "appService.deploySubpath": ".",
+  "appService.defaultWebAppToDeploy": "/subscriptions/7dfc76d1-645a-4e56-bd3d-431a1744d368/resourceGroups/appsvc_linux_centralus/providers/Microsoft.Web/sites/my-netatmo-dashboard"
 }

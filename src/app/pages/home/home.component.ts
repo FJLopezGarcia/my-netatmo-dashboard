@@ -9,7 +9,6 @@ import { NetatmoService } from '../../services/netatmo.service';
 import * as moment from 'moment';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { Chart } from 'chart.js';
-
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
@@ -27,16 +26,18 @@ export class HomeComponent implements OnInit {
   // Used for Charts
   bars: any;
   colorArray: any;
-  hola: any;
 
   values$: Observable<User>;
 
   boilerDayResult: any = ([] = []);
   boilerMonthResult: any = ([] = []);
-  weatherDayResult: any = ([] = []);
+  ExternalWeatherDayResult: any = ([] = []);
 
   netatmoAuthorize: string | null = null;
   authorizeError: string | null = null;
+
+  date_begin: any;
+  date_end: any;
 
   constructor(
     readonly afAuth: AngularFireAuth,
@@ -91,6 +92,9 @@ export class HomeComponent implements OnInit {
           }
         }),
         switchMap(user => {
+          console.log('user.expires_at ' + moment.unix(user.expires_at / 1000).format('DD/MM/YYYY HH:mmA'));
+          console.log('Date.now(): ' + moment.unix(Date.now() / 1000).format('DD/MM/YYYY HH:mmA'));
+
           if (user != null && user.expires_at <= Date.now() && user.refresh_token != null) {
             console.log('refresh netatmo access token using refresh token');
             return this.netatomService.refreshAccessToken(user.refresh_token).pipe(
@@ -136,28 +140,29 @@ export class HomeComponent implements OnInit {
   async getMeasureByDays() {
     const scale = '1day'; // 1month, 1day
 
-    const date_begin = moment('2020-01')
+    this.date_begin = moment('2021-01')
       .startOf('month')
       .unix();
-    const date_end = moment()
-      .endOf('month')
+
+    this.date_end = moment()
+      .endOf('day')
       .unix();
 
     console.log('******** Timeline by Day ********');
-    console.log('date_begin (timestamp): ', date_begin);
-    console.log('date_begin: ', moment.unix(date_begin).format('DD/MM/YYYY HH:mmA'));
-    console.log('date_end (timestamp): ', date_end);
-    console.log('date_end: ', moment.unix(date_end).format('DD/MM/YYYY HH:mmA'));
+    console.log('date_begin (timestamp): ', this.date_begin);
+    console.log('date_begin: ', moment.unix(this.date_begin).format('DD/MM/YYYY HH:mmA'));
+    console.log('date_end (timestamp): ', this.date_end);
+    console.log('date_end: ', moment.unix(this.date_end).format('DD/MM/YYYY HH:mmA'));
     console.log('*******************************');
 
     const values = await this.values$.pipe(take(1)).toPromise();
     if (values !== null) {
       // reset result to be able to reload one every click
       this.boilerDayResult = [] = [];
-      this.weatherDayResult = [] = [];
+      this.ExternalWeatherDayResult = [] = [];
 
       // Boiler
-      this.netatomService.getBoilerMeasure(values.access_token, scale, date_begin, date_end).subscribe(netatmomesure => {
+      this.netatomService.getBoilerMeasure(values.access_token, scale, this.date_begin, this.date_end).subscribe(netatmomesure => {
         Object.keys(netatmomesure['body']).forEach(key => {
           this.boilerDayResult.push({
             date: key,
@@ -169,69 +174,35 @@ export class HomeComponent implements OnInit {
         console.log('******** getMeasure BOILER by Day result ********');
         console.log(this.boilerDayResult);
       });
-
       // Weather
-      this.netatomService.getWeatherMeasure(values.access_token, scale, date_begin, date_end).subscribe(netatmomesure => {
+      this.netatomService.getExternalWeatherMeasure(values.access_token, scale, this.date_begin, this.date_end).subscribe(netatmomesure => {
         Object.keys(netatmomesure['body']).forEach(key => {
-          this.weatherDayResult.push({
+          this.ExternalWeatherDayResult.push({
             date: key,
             Temperature: netatmomesure['body'][key][0],
             Humidity: netatmomesure['body'][key][1],
+            MaxTemp: netatmomesure['body'][key][2],
+            MinTemp: netatmomesure['body'][key][3],
           });
         });
         console.log('******** getMeasure WEATHER by Day result ********');
-        console.log(this.weatherDayResult);
+        console.log(this.ExternalWeatherDayResult);
 
         this.createBarChartDaily();
       });
     }
   }
-
-  async getMeasureMonhly() {
-    const scale = '1month'; // 1month, 1day
-    const values = await this.values$.pipe(take(1)).toPromise();
-
-    const date_begin = moment('2017-01')
-      .startOf('month')
-      .unix();
-    const date_end = moment()
-      .endOf('month')
-      .unix();
-
-    console.log('******** Timeline by Month ********');
-    console.log('date_begin (timestamp): ', date_begin);
-    console.log('date_begin: ', moment.unix(date_begin).format('DD/MM/YYYY HH:mmA'));
-    console.log('date_end (timestamp): ', date_end);
-    console.log('date_end: ', moment.unix(date_end).format('DD/MM/YYYY HH:mmA'));
-
-    if (values !== null) {
-      this.boilerMonthResult = [] = [];
-
-      this.netatomService.getBoilerMeasure(values.access_token, scale, date_begin, date_end).subscribe(netatmomesure => {
-        Object.keys(netatmomesure['body']).forEach(key => {
-          this.boilerMonthResult.push({
-            date: key,
-            boiler_on: Math.round((netatmomesure['body'][key][0] / 3600) * 100) / 100,
-            boiler_off: Math.round((netatmomesure['body'][key][1] / 3600) * 100) / 100,
-            total: Math.round(netatmomesure['body'][key][0] / 3600 + netatmomesure['body'][key][1] / 3600),
-          });
-        });
-        console.log('******** getMeasure BOILER by Month result ********');
-        console.log(this.boilerMonthResult);
-        this.createBarChartMonthly();
-      });
-    }
-  }
-
   createBarChartDaily() {
     const dataset_date: any = ([] = []);
     const dataset_boiler_on: any = ([] = []);
     const dataset_boiler_off: any = ([] = []);
     const dataset_total: any = ([] = []);
 
-    const dataset_weather_date: any = ([] = []);
-    const dataset_weather_temp: any = ([] = []);
-    const dataset_weather_hum: any = ([] = []);
+    const dataset_external_weather_date: any = ([] = []);
+    const dataset_external_weather_avg_temp: any = ([] = []);
+    const dataset_external_weather_hum: any = ([] = []);
+    const dataset_external_weather_max_temp: any = ([] = []);
+    const dataset_external_weather_min_temp: any = ([] = []);
 
     for (const k in this.boilerDayResult) {
       if (this.boilerDayResult.hasOwnProperty(k)) {
@@ -242,11 +213,13 @@ export class HomeComponent implements OnInit {
       }
     }
 
-    for (const k in this.weatherDayResult) {
-      if (this.weatherDayResult.hasOwnProperty(k)) {
-        dataset_weather_date.push(moment.unix(this.weatherDayResult[k].date).format('DD/MM/YYYY'));
-        dataset_weather_temp.push(this.weatherDayResult[k].Temperature);
-        dataset_weather_hum.push(this.weatherDayResult[k].Humidity);
+    for (const k in this.ExternalWeatherDayResult) {
+      if (this.ExternalWeatherDayResult.hasOwnProperty(k)) {
+        dataset_external_weather_date.push(moment.unix(this.ExternalWeatherDayResult[k].date).format('DD/MM/YYYY'));
+        dataset_external_weather_avg_temp.push(this.ExternalWeatherDayResult[k].Temperature);
+        dataset_external_weather_hum.push(this.ExternalWeatherDayResult[k].Humidity);
+        dataset_external_weather_max_temp.push(this.ExternalWeatherDayResult[k].MaxTemp);
+        dataset_external_weather_min_temp.push(this.ExternalWeatherDayResult[k].MinTemp);
       }
     }
 
@@ -258,7 +231,12 @@ export class HomeComponent implements OnInit {
       blue: 'rgb(54, 162, 235)',
       purple: 'rgb(153, 102, 255)',
       grey: 'rgb(201, 203, 207)',
+      black: 'rgb(0,0,0)',
+      white: 'rgb(255,255,255)',
+      cyan: 'rgb(0,255,255)',
+      magenta: 'rgb(255,0,255)',
     };
+
     if (this.chartDaily) {
       this.chartDaily.destroy();
     }
@@ -268,6 +246,66 @@ export class HomeComponent implements OnInit {
       data: {
         labels: dataset_date, // your labels array
         datasets: [
+          // {
+          //   label: 'Weather External AVG emp', // To label a particular data set
+          //   data: dataset_external_weather_avg_temp,
+          //   backgroundColor: chartColors.purple, // array should have same number of elements as number of dataset
+          //   borderColor: chartColors.purple, // array should have same number of elements as number of dataset
+          //   borderWidth: 1.5,
+          //   type: 'line',
+          //   fill: false,
+          //   datalabels: {
+          //     align: 'end',
+          //     anchor: 'start',
+          //     color: 'blue',
+          //   },
+          //   yAxisID: 'B',
+          // },
+          {
+            label: 'Weather External MAX Temp', // To label a particular data set
+            data: dataset_external_weather_max_temp,
+            backgroundColor: chartColors.magenta, // array should have same number of elements as number of dataset
+            borderColor: chartColors.magenta, // array should have same number of elements as number of dataset
+            borderWidth: 1.5,
+            type: 'line',
+            fill: false,
+            datalabels: {
+              align: 'end',
+              anchor: 'start',
+              color: 'blue',
+            },
+            yAxisID: 'B',
+          },
+          {
+            label: 'Weather External MIN Temp', // To label a particular data set
+            data: dataset_external_weather_min_temp,
+            backgroundColor: chartColors.orange, // array should have same number of elements as number of dataset
+            borderColor: chartColors.orange, // array should have same number of elements as number of dataset
+            borderWidth: 1.5,
+            type: 'line',
+            fill: false,
+            datalabels: {
+              align: 'end',
+              anchor: 'start',
+              color: 'blue',
+            },
+            yAxisID: 'B',
+          },
+          // {
+          //   label: 'Weather External Humidity', // To label a particular data set
+          //   data: dataset_external_weather_hum,
+          //   backgroundColor: chartColors.orange, // array should have same number of elements as number of dataset
+          //   borderColor: chartColors.orange, // array should have same number of elements as number of dataset
+          //   borderWidth: 1.5,
+          //   type: 'line',
+          //   fill: false,
+          //   datalabels: {
+          //     align: 'end',
+          //     anchor: 'start',
+          //     color: 'blue',
+          //   },
+          //   yAxisID: 'B',
+          // },
           {
             label: 'Sum boiler on', // To label a particular data set
             data: dataset_boiler_on,
@@ -313,41 +351,44 @@ export class HomeComponent implements OnInit {
             },
             yAxisID: 'A',
           },
-          {
-            label: 'Weather Temp', // To label a particular data set
-            data: dataset_weather_temp,
-            backgroundColor: chartColors.purple, // array should have same number of elements as number of dataset
-            borderColor: chartColors.purple, // array should have same number of elements as number of dataset
-            borderWidth: 1.5,
-            type: 'line',
-            fill: false,
-            datalabels: {
-              align: 'end',
-              anchor: 'start',
-              color: 'blue',
-            },
-            yAxisID: 'B',
-          },
-          // {
-          //   label: 'Weather Humidity', // To label a particular data set
-          //   data: dataset_weather_hum,
-          //   backgroundColor: chartColors.orange, // array should have same number of elements as number of dataset
-          //   borderColor: chartColors.orange, // array should have same number of elements as number of dataset
-          //   borderWidth: 1.5,
-          //   type: 'line',
-          //   fill: false,
-          //   datalabels: {
-          //     align: 'end',
-          //     anchor: 'start',
-          //     color: 'blue',
-          //   },
-          //   yAxisID: 'B',
-          // },
         ],
       },
       plugins: [ChartDataLabels],
       options: {
         plugins: {
+          zoom: {
+            pan: {
+              enabled: true,
+              mode: 'x',
+              // speed: '20',
+              onPan: function({ chartDaily }) {
+                console.log(`I'm panning!!!`);
+              },
+              onPanComplete: function({ chartDaily }) {
+                console.log(`I was panned!!!`);
+              },
+            },
+            zoom: {
+              enabled: true,
+              // drag: true,
+              drag: {
+                borderColor: 'hsl(35, 100%, 60%)',
+                borderWidth: '3',
+                backgroundColor: 'hsl(35, 100%, 60%)',
+              },
+              mode: 'x',
+              sensitivity: 3,
+              // speed: 20,
+              // threshold: 2,
+              // sensitivity: 0.5,
+              onZoom: function({ chartDaily }) {
+                console.log(`I'm zooming!!!`);
+              },
+              onZoomComplete: function({ chartDaily }) {
+                console.log(`I was zoomed!!!`);
+              },
+            },
+          },
           datalabels: {
             color: 'black',
             // anchor: 'center',
@@ -412,6 +453,41 @@ export class HomeComponent implements OnInit {
     });
   }
 
+  async getMeasureMonhly() {
+    const scale = '1month'; // 1month, 1day
+    const values = await this.values$.pipe(take(1)).toPromise();
+
+    const date_begin = moment('2017-01')
+      .startOf('month')
+      .unix();
+    const date_end = moment()
+      .endOf('month')
+      .unix();
+
+    console.log('******** Timeline by Month ********');
+    console.log('date_begin (timestamp): ', date_begin);
+    console.log('date_begin: ', moment.unix(date_begin).format('DD/MM/YYYY HH:mmA'));
+    console.log('date_end (timestamp): ', date_end);
+    console.log('date_end: ', moment.unix(date_end).format('DD/MM/YYYY HH:mmA'));
+
+    if (values !== null) {
+      this.boilerMonthResult = [] = [];
+
+      this.netatomService.getBoilerMeasure(values.access_token, scale, date_begin, date_end).subscribe(netatmomesure => {
+        Object.keys(netatmomesure['body']).forEach(key => {
+          this.boilerMonthResult.push({
+            date: key,
+            boiler_on: Math.round((netatmomesure['body'][key][0] / 3600) * 100) / 100,
+            boiler_off: Math.round((netatmomesure['body'][key][1] / 3600) * 100) / 100,
+            total: Math.round(netatmomesure['body'][key][0] / 3600 + netatmomesure['body'][key][1] / 3600),
+          });
+        });
+        console.log('******** getMeasure BOILER by Month result ********');
+        console.log(this.boilerMonthResult);
+        this.createBarChartMonthly();
+      });
+    }
+  }
   createBarChartMonthly() {
     const dataset_date: any = ([] = []);
     const dataset_boiler_on: any = ([] = []);

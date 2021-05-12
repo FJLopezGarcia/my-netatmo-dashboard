@@ -4,26 +4,24 @@
     <h5>{{ user.email }}</h5>
     <img [src]="user.photoURL" class="avatar">
     <button (click)="logout()">Logout</button>
-  </div>
-     
+  </div>  
     <!-- <h2>User:</h2>
     <pre>{{ user | json }}</pre> -->
-    <h3>Values:</h3>
+
+    <h3>Netatmo Values</h3>
+    <h5>Stores in Firebase (MyNetatmoApp)</h5>
     <pre>{{ values$ | async | json }}</pre> 
-    
   <div>
-    <button (click)="getMeasureMonhly()">Monthly</button>
     <button (click)="getMeasureByDays()">Daily</button>
   </div>
-  
   <div>
-    <canvas #lineChartDaily class="chart-container">{{ chartDaily }}</canvas>
-  </div>  
-  <p></p>
-  <div>
-    <canvas #lineChartMonthly class="chart-container">{{ chartMonthly }}</canvas>
+    <button (click)="getMeasureMonhly()">Monthly</button>
   </div>
-
+  
+  <div style="width:90%;">
+    <canvas #lineChartDaily>{{ chartDaily }}</canvas>
+    <canvas #lineChartMonthly>{{ chartMonthly }}</canvas>
+  </div>
 
 </div>
 

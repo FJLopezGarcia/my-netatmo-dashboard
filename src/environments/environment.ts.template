@@ -9,8 +9,13 @@ export const environment = {
     messagingSenderId: '<%= MY_NETATMO_DASHBOARD_FIREBASE_SENDER_ID %>',
   },
   netatmo: {
-    clientId: '<%= MY_NETATMO_DASHBOARD_NETATMO_CLIENT_ID %>',
-    clientSecret: '<%= MY_NETATMO_DASHBOARD_NETATMO_CLIENT_SECRET %>',
+    clientId: '<%= MY_NETATMO_DASHBOARD_NETATMO_CLIENT_ID_PROD %>',
+    clientSecret: '<%= MY_NETATMO_DASHBOARD_NETATMO_CLIENT_SECRET_PROD %>',
+    boiler_device_id: '<%= MY_NETATMO_DASHBOARD_NETATMO_boiler_device_id_PROD %>',
+    boiler_module_id: '<%= MY_NETATMO_DASHBOARD_NETATMO_boiler_module_id_PROD %>',
+    weather_device_id: '<%= MY_NETATMO_DASHBOARD_NETATMO_weather_device_id_PROD %>',
+    weather_External_module_id: '<%= MY_NETATMO_DASHBOARD_NETATMO_weather_External_module_id_PROD %>',
+    weather_Dormitorio_module_id: '<%= MY_NETATMO_DASHBOARD_NETATMO_weather_Dormitorio_module_id_PROD %>',
     redirectUri: 'http://localhost:4200/callback',
   },
 };
